@@ -1,6 +1,5 @@
 let ball = {
     position: null,
-    connected: false,
     velocity: null,
     create: function (position, velocity) {
         let object = Object.create(this)

@@ -21,22 +21,22 @@ let connectedBalls = []
 
 let startAnimationFrames = function () {
     context.clearRect(0, 0, width, height)
-    drawShotBall()
     drawCenterBall()
     drawBottomBalls()
     rotateConnectedBalls()
     drawConnectedBalls()
+    drawShotBall()
+    checkShotBallConnection()
 
     let collided = checkShotBallCollision()
     if (collided) {
         resetGame()
         return
     }
-    let status = checkSuccess()
-    if (status) {
+    let succeeded = checkSuccess()
+    if (succeeded) {
         return
     }
-    checkShotBallConnection()
     animationFrame = requestAnimationFrame(startAnimationFrames)
 }
 
@@ -87,6 +87,7 @@ function drawBottomBalls () {
     })
 }
 function drawConnectedBalls () {
+    //console.log('connectedBalls',connectedBalls)
     connectedBalls.forEach((ball, index) => {
         context.beginPath()
         context.arc(ball.position.getX(), ball.position.getY(), ballRadius, 0, 2 * Math.PI)
@@ -130,9 +131,9 @@ function checkShotBallConnection () {
 }
 function rotateConnectedBalls () {
     connectedBalls.forEach(ball => {
-        let ballCenterVector = ball.getPosition().subtractFrom(centerPageVector)
-        let velocityVectory = getVelocityVector(ballCenterVector)
-        let ballNextPosition = centerPageVector.addTo(ballCenterVector).addTo(velocityVectory)
+        let ballCentralVector = ball.getPosition().subtractFrom(centerPageVector)
+        let velocityVector = getVelocityVector(ballCentralVector)
+        let ballNextPosition = centerPageVector.addTo(ballCentralVector).addTo(velocityVector)
         ball.setPosition(ballNextPosition)
     })
 
@@ -153,8 +154,6 @@ function checkShotBallCollision () {
         if (shotBall) {
             let distance = calculateBallsDistance(lowestBall, shotBall)
             if (distance <= 2 * ballRadius ) {
-                window.cancelAnimationFrame(animationFrame)
-                animationFrame = null
                 return true
             }
         }
@@ -166,26 +165,25 @@ function calculateBallsDistance (ball1, ball2) {
     return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2))
 }
 function resetGame () {
-    cancelAnimationFrame(animationFrame)
     document.querySelector('body').style.backgroundColor = '#ff0c00d6'
     playLossSound()
     setTimeout(() => {
         document.querySelector('body').style.backgroundColor = 'white'
-        initBottomBalls()
+        shotBall = null
         connectedBalls = []
+        initBottomBalls()
         startAnimationFrames()
     }, 1000)
-
 }
 function checkSuccess () {
-    if (bottomBalls.length === 0) {
+    if (connectedBalls.length === ballNumbers) {
         document.querySelector('body').style.backgroundColor = 'rgba(3,198,71,0.84)'
         playWinSound()
         loadNextLevel()
         setTimeout(() => {
             document.querySelector('body').style.backgroundColor = 'white'
-            initBottomBalls()
             connectedBalls = []
+            initBottomBalls()
             startAnimationFrames()
         }, 1000)
         return true
