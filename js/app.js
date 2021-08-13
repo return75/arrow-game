@@ -34,11 +34,9 @@ let startAnimationFrames = function () {
 
 
 function keyboardHandling () {
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener('keydown', event => {
         if (event.code === 'Space') {
-            shootedBall = bottomBalls.splice(0, 1)[0]
-            // move remained balls to top
-            bottomBalls.map(ball => ball.position.setY(ball.position.getY() - (2 * ballRadius + bottomBallsSpace)))
+            shootBall()
         } else if (event.key === 'Escape') {
             if (!animationFrame) {
                 requestAnimationFrame(startAnimationFrames)
@@ -49,6 +47,12 @@ function keyboardHandling () {
         }
     })
 }
+function mouseHandling () {
+    document.addEventListener('mouseup', event => {
+        shootBall()
+    })
+}
+
 function initBottomBalls () {
     for (let i = 0; i < ballNumbers; i++) {
         let newBall = ball.create(vector.create(width / 2, height - 100 + i * (2 * ballRadius + bottomBallsSpace)), shootedBallVelocityVector)
@@ -71,11 +75,22 @@ function drawBottomBalls () {
     })
 }
 function drawConnectedBalls () {
-    connectedBalls.forEach(ball => {
+    connectedBalls.forEach((ball, index) => {
         context.beginPath()
         context.arc(ball.position.getX(), ball.position.getY(), ballRadius, 0, 2 * Math.PI)
         context.fillStyle = '#000'
         context.fill()
+
+        // draw line to centerBall
+        context.beginPath();
+        context.moveTo(width / 2, height / 2);
+        context.lineTo(ball.position.getX(), ball.position.getY());
+        context.stroke();
+
+        // draw number in center
+        context.font="bold 20px Roman";
+        context.fillStyle = '#fff'
+        context.fillText((index + 1).toString(), ball.position.getX() - ballRadius / 4 , ball.position.getY() + ballRadius / 3);
     })
 }
 function drawShootedBall () {
@@ -86,6 +101,11 @@ function drawShootedBall () {
     context.arc(shootedBall.getPosition().getX(), shootedBall.getPosition().getY(), ballRadius, 0, 2 * Math.PI)
     context.fillStyle = '#000'
     context.fill()
+}
+function shootBall () {
+    shootedBall = bottomBalls.splice(0, 1)[0]
+    // move remained balls to top
+    bottomBalls.map(ball => ball.position.setY(ball.position.getY() - (2 * ballRadius + bottomBallsSpace)))
 }
 function checkShootedBallConnection () {
     if (!shootedBall) return
@@ -138,3 +158,4 @@ function calculateBallsDistance (ball1, ball2) {
 initBottomBalls()
 startAnimationFrames()
 keyboardHandling()
+mouseHandling()
