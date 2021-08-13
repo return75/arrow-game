@@ -3,8 +3,9 @@ let context = canvas.getContext("2d")
 let width = canvas.width = window.innerWidth
 let height = canvas.height = window.innerHeight
 
-let animationFrame,
+let animationFrame = null,
     ballNumbers = 10,
+    centerBallRadius = 70,
     shootedBallVelocityVector = vector.create(0, -10),
     centerPageVector = vector.create(width / 2, height / 2)
     rotationVelocity = 10,
@@ -15,17 +16,19 @@ let animationFrame,
 
 let bottomBalls = []
 let connectedBalls = []
-initBottomBalls()
+
 
 
 let startAnimationFrames = function () {
     context.clearRect(0, 0, width, height)
     drawCenterBall()
-    checkShootedBallConnection()
+    drawBottomBalls()
     rotateConnectedBalls()
     drawConnectedBalls()
     drawShootedBall()
-    drawBottomBalls()
+    let collided = checkShootedBallCollision()
+    if (collided) return
+    checkShootedBallConnection()
     animationFrame = requestAnimationFrame(startAnimationFrames)
 }
 
@@ -34,10 +37,9 @@ function keyboardHandling () {
     document.addEventListener('keydown', (event) => {
         if (event.code === 'Space') {
             shootedBall = bottomBalls.splice(0, 1)[0]
-
             // move remained balls to top
             bottomBalls.map(ball => ball.position.setY(ball.position.getY() - (2 * ballRadius + bottomBallsSpace)))
-        } else if (event.code === 'Escape') {
+        } else if (event.key === 'Escape') {
             if (!animationFrame) {
                 requestAnimationFrame(startAnimationFrames)
             } else {
@@ -55,9 +57,10 @@ function initBottomBalls () {
 }
 function drawCenterBall () {
     context.beginPath()
-    context.arc(width / 2, height / 2, 70, 0, 2 * Math.PI)
+    context.arc(width / 2, height / 2, centerBallRadius, 0, 2 * Math.PI)
     context.fillStyle = '#000'
     context.fill()
+    document.querySelector('#center-number').innerHTML = bottomBalls.length.toString()
 }
 function drawBottomBalls () {
     bottomBalls.forEach(ball => {
@@ -109,10 +112,29 @@ function getVelocityVector (vector) {
     velocityVector.setAngle(sourceVectorAngle + Math.PI - angle)
     return velocityVector
 }
+function checkShootedBallCollision () {
+    if (connectedBalls.length) {
+        let lowestBall = connectedBalls.reduce((accumulator, element) => {
+            return accumulator.position.getY() > element.position.getY() ? accumulator : element
+        })
+        if (shootedBall) {
+            let distance = calculateBallsDistance(lowestBall, shootedBall)
+            if (distance <= 2 * ballRadius ) {
+                window.cancelAnimationFrame(animationFrame)
+                animationFrame = null
+                return true
+            }
+        }
+    }
+}
 
-setTimeout(() => {
-    rotateConnectedBalls()
-}, 5000)
+function calculateBallsDistance (ball1, ball2) {
+    let xDistance = ball1.position.getX() - ball2.position.getX()
+    let yDistance = ball1.position.getY() - ball2.position.getY()
+    return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2))
+}
 
+
+initBottomBalls()
 startAnimationFrames()
 keyboardHandling()
