@@ -17,6 +17,9 @@ let ball = {
     setVelocity: function (velocity) {
         this.velocity = velocity
     },
+    setConnection (connected) {
+      this.connected = connected
+    },
     getVelocity () {
         return this.velocity
     }

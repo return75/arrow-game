@@ -2,7 +2,7 @@ var vector = {
     _x: 1,
     _y: 1,
     create: function (x, y) {
-        let object = Object.create (this)
+        let object = Object.create(this)
         object.setX (x)
         object.setY (y)
         return object
@@ -12,14 +12,17 @@ var vector = {
         this._y += vector._y
     },
     addTo (vector) {
-        return vector.create (this._x + vector._x, this._y + vector._y)
+        return vector.create(this._x + vector._x, this._y + vector._y)
     },
     subtract (vector) {
         this._x -= vector._x
         this._y -= vector._y
     },
+    subtractFrom (vector) {
+        return vector.create(this._x- vector._x, this._y - vector._y)
+    },
     multiplyBy (number) {
-        return vector.create (this._x * number, this._y * number)
+        return vector.create(this._x * number, this._y * number)
     },
     setX: function (x) {
         this._x = x
@@ -40,10 +43,9 @@ var vector = {
         let angle = this.getAngle()
         this._x = length * Math.cos(angle)
         this._y = length * Math.sin(angle)
-
     },
     setAngle: function (angle) {
-        let length = this.getLength ()
+        let length = this.getLength()
         this._x = length * Math.cos(angle)
         this._y = length * Math.sin(angle)
     },
